@@ -2,6 +2,8 @@
 
 Sort of inspired by https://w3.cs.jmu.edu/cs347/s24/projects/1/possible-projects/#15-yo-ill-solve-it
 
+(professional level webapp that can be used to poll people and create schedules)
+
 ## Problems
 1. 1:1 scheduling
 2. TA Scheduling
@@ -9,8 +11,8 @@ Sort of inspired by https://w3.cs.jmu.edu/cs347/s24/projects/1/possible-projects
 
 ## UX Considerations
 1. how to present variables/weights/formulae to the ProblemHaver
-  2. are they zero sum
-  3. will person choose values that aren't important to base 10
+  2. should weights add up to some value?
+  3. should weights be values that aren't important to base 10?
 4. show multiple every time
 5. Tinder thing
 6. permit fixing partial solution
@@ -22,6 +24,6 @@ Sort of inspired by https://w3.cs.jmu.edu/cs347/s24/projects/1/possible-projects
 3. questionnaire software (jmu.questionpro.com)
 
 ## Roles
-1. ProblemHaver
-2. Producer
-3. Consumer
+1. ProblemHaver - The individual who has a scheduling problem that needs to be solved.
+2. Producer - The resource that is being offered.
+3. Consumer - The ones being offered the resource.
