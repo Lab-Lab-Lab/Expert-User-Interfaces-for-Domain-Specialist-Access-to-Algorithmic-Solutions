@@ -12,14 +12,23 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import DataReader from '../../algorithm-testing/src/data/io/data-reader'
 
 
 
 function App() {
 
   function choseCSV(data) {
-    console.log('mike check', data)
-    console.log(data.get('prof'))
+    console.log(data)
+    const profReader = new DataReader(data.get('prof'));
+    const stuReader = new DataReader(data.get('students'));
+    
+
+    // Wait for the file to be parsed asynchronously
+    setTimeout(() => {
+      console.log('Parsed Prof Data:', profReader.parsedData);
+      console.log('Parsed Student Data:', stuReader.parsedData);
+    }, 1000); // Adjust the timeout as needed
   }
 
   return (
@@ -27,7 +36,7 @@ function App() {
       <div style={{ height: "100vh", width: "100vw" }}>
 
         <Navbar expand="lg" className="bg-body-tertiary justify-content-between">
-          <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+          {/* <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand> */}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
 
@@ -53,7 +62,7 @@ function App() {
                 </Col>
               </Row>
             </Form>
-            <Nav className="me-auto">
+            {/* <Nav className="me-auto">
               <Nav.Link href="#home">Home</Nav.Link>
               <Nav.Link href="#link">Link</Nav.Link>
               <NavDropdown title="Dropdown" id="basic-nav-dropdown">
@@ -67,7 +76,7 @@ function App() {
                   Separated link
                 </NavDropdown.Item>
               </NavDropdown>
-            </Nav>
+            </Nav> */}
           </Navbar.Collapse>
         </Navbar>
         <HorizontalFlow></HorizontalFlow>

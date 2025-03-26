@@ -1,20 +1,22 @@
-const fs = require('fs');
-const path = require('path');
-const Papa = require('papaparse');
+import Papa from 'papaparse';
 
 /**
  * Reads in CSV data for use in generating a solution.
  */
-class DataReader {
+export default class DataReader {
     /**
      * Creates an instance of DataReader.
      * 
-     * @param {string} filePath - The path to the CSV file.
+     * @param {File} file - The File object representing the CSV file.
      */
-    constructor(filePath) {
-        this.filePath = filePath;
+    constructor(file) {
         this._parsedData = null;
-        this.readAndParseCSV(filePath);
+
+        if (file instanceof File) {
+            this.readAndParseCSVFromFile(file);
+        } else {
+            throw new Error('Invalid input: must be a File object.');
+        }
     }
 
     /**
@@ -39,21 +41,24 @@ class DataReader {
     }
 
     /**
-     * Reads and parses the CSV file.
+     * Reads and parses the CSV file from a File object.
      * 
-     * @param {string} filePath - The path to the CSV file.
+     * @param {File} file - The File object.
      */
-    readAndParseCSV(filePath) {
-        try {
-            const data = fs.readFileSync(filePath, 'utf8');
+    readAndParseCSVFromFile(file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const data = event.target.result;
             const results = Papa.parse(data, {
                 header: true,
                 skipEmptyLines: true,
             });
             this.parsed(results);
-        } catch (err) {
+        };
+        reader.onerror = (err) => {
             console.error('Error reading the file:', err);
-        }
+        };
+        reader.readAsText(file);
     }
 
     /**
@@ -65,5 +70,3 @@ class DataReader {
         this._parsedData = results.data; // Set the private property
     }
 }
-
-module.exports = DataReader;
