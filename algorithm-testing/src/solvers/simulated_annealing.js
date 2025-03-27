@@ -1,7 +1,7 @@
 /**
  * Implements the simulated annealing optimization algorithm.
  */
-class SimulatedAnnealing {
+export default class SimulatedAnnealing {
     /**
      * Creates an instance of SimulatedAnnealing.
      * 
@@ -64,5 +64,3 @@ class SimulatedAnnealing {
         return Math.exp((score_b - score_a) / temp);
     }
 }
-
-module.exports = SimulatedAnnealing;

@@ -13,6 +13,8 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import DataReader from '../../algorithm-testing/src/data/io/data-reader'
+import LinkedGraph from '../../algorithm-testing/src/dataStructures/LinkedGraph'
+import SimulatedAnnealing from '../../algorithm-testing/src/solvers/simulated_annealing'
 
 
 
@@ -29,6 +31,63 @@ function App() {
       console.log('Parsed Prof Data:', profReader.parsedData);
       console.log('Parsed Student Data:', stuReader.parsedData);
     }, 1000); // Adjust the timeout as needed
+
+    const fullGraph = new LinkedGraph()
+    const solGraph = new LinkedGraph()
+
+    // Load data into the graph data structure
+    profReader.parsedData.forEach((entry) => {
+      fullGraph.addNode(entry.get('"What times are you available to meet with Dr. Stewart? (please select all times that you are available)"'))
+      solGraph.addNode(entry.get('"What times are you available to meet with Dr. Stewart? (please select all times that you are available)"'))
+    })
+
+    numStudents = 0
+    stuReader.parsedData.forEach((entry) => {
+      const id = entry.get('id')
+      fullGraph.addNode(id)
+      solGraph.addNode(id)
+      numStudents++
+
+      const times = entry.get('"What times are you available to meet with Dr. Stewart? (please select all times that you are available)"').split(';')
+      times.forEach((time) => {
+        fullGraph.addEdge(id, time)
+      })
+    })
+
+    function score(graph) {
+      score = 0
+      for (let i = 0; i < numStudents; i++) {
+        if (graph.getNeighbors(i).length > 0) {
+          score += 100
+        }
+      }
+      return score
+    }
+
+    function neighbor(graph) {
+      randomStudent = Math.floor(Math.random() * (numStudents));
+      connection = solGraph.getNeighbors(randomStudent)
+      if (connection.length > 0) {
+        connection = solGraph.connection[0]
+        // Delete the edge
+        solGraph.removeEdge(randomStudent, connection)
+
+        // Try to find an alternate edge to connect to, if not do nothing
+      } else {
+        // Try to find an open node, if one exists and add an edge
+        // Otherwise try again
+      } 
+
+      return solGraph
+    }
+
+    function temperature(percentCompleted) {
+      return 10000 * 0.95^percentCompleted;
+    }
+
+    const solver = new SimulatedAnnealing(solGraph, 100, temperature, neighbor, score)
+    solver.optimize()
+    console.log(solver.best_solution)
   }
 
   return (

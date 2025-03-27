@@ -1,4 +1,4 @@
-class LinkedGraph {
+export default class LinkedGraph {
     constructor() {
         this.nodes = new Map(); // Map to store nodes by their unique identifiers
     }
@@ -14,11 +14,16 @@ class LinkedGraph {
             throw new Error("Both nodes must exist before adding an edge.");
         }
         this.nodes.get(fromId).add(toId); // Add a directed edge from 'fromId' to 'toId'
+        this.nodes.get(toId).add(toId); // Add a directed edge from 'toId' to 'fromId'
     }
 
     removeEdge(fromId, toId) {
         if (this.nodes.has(fromId)) {
             this.nodes.get(fromId).delete(toId); // Remove the directed edge
+        }
+        
+        if (this.nodes.has(toId)) {
+            this.nodes.get(toId).delete(fromId); // Remove the directed edge
         }
     }
 
@@ -42,5 +47,3 @@ class LinkedGraph {
         return this.nodes.has(fromId) && this.nodes.get(fromId).has(toId);
     }
 }
-
-module.exports = LinkedGraph;
