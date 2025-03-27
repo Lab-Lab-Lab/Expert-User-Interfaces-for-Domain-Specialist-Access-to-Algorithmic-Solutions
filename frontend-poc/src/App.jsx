@@ -66,19 +66,38 @@ function App() {
 
     function neighbor(graph) {
       randomStudent = Math.floor(Math.random() * (numStudents));
-      connection = solGraph.getNeighbors(randomStudent)
+      connection = graph.getNeighbors(randomStudent)
       if (connection.length > 0) {
-        connection = solGraph.connection[0]
+        connection = graph.connection[0]
         // Delete the edge
-        solGraph.removeEdge(randomStudent, connection)
+        graph.removeEdge(randomStudent, connection)
 
         // Try to find an alternate edge to connect to, if not do nothing
+        potentialConnections = fullGraph.getNeighbors(randomStudent)
+        potentialConnections.some((node) => {
+          if (node != connection && graph.getNeighbors(node).length == 0) {
+            graph.addEdge(randomStudent, node)
+            return true;
+          }
+        })
       } else {
+        success = false
         // Try to find an open node, if one exists and add an edge
+        potentialConnections = fullGraph.getNeighbors(randomStudent)
+        potentialConnections.some((node) => {
+          if (graph.getNeighbors(node).length == 0) {
+            graph.addEdge(randomStudent, node)
+            success = true
+            return true
+          }
+        })
         // Otherwise try again
+        if (!success) {
+          neighbor(graph)
+        }
       } 
 
-      return solGraph
+      return graph
     }
 
     function temperature(percentCompleted) {
