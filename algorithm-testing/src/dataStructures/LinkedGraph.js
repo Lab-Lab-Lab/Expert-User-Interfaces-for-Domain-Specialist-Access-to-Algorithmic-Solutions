@@ -14,7 +14,7 @@ export default class LinkedGraph {
             throw new Error("Both nodes must exist before adding an edge.");
         }
         this.nodes.get(fromId).add(toId); // Add a directed edge from 'fromId' to 'toId'
-        this.nodes.get(toId).add(toId); // Add a directed edge from 'toId' to 'fromId'
+        this.nodes.get(toId).add(fromId); // Add a directed edge from 'toId' to 'fromId'
     }
 
     removeEdge(fromId, toId) {

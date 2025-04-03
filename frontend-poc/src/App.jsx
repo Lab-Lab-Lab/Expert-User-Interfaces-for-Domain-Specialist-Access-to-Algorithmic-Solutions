@@ -24,7 +24,7 @@ function App() {
     console.log(data)
     const profReader = new DataReader(data.get('prof'));
     const stuReader = new DataReader(data.get('students'));
-    
+
     const profData = (await profReader.ready()).data
     const stuData = (await stuReader.ready()).data
 
@@ -53,6 +53,10 @@ function App() {
       })
     })
 
+    // debugger
+
+    console.log(fullGraph)
+
     function score(graph) {
       score = 0
       for (let i = 0; i < numStudents; i++) {
@@ -64,43 +68,42 @@ function App() {
     }
 
     function neighbor(graph) {
-      const randomStudent = Math.floor(Math.random() * (numStudents));
-      let connection = graph.getNeighbors(randomStudent.toString())
+      const randomStudent = Math.floor(Math.random() * numStudents);
+      let connection = graph.getNeighbors(randomStudent.toString());
+
       if (connection.length > 0) {
-        connection = connection[0]
+        connection = connection[0];
         // Delete the edge
-        graph.removeEdge(randomStudent, connection)
+        graph.removeEdge(randomStudent, connection);
 
-        // Try to find an alternate edge to connect to, if not do nothing
-        let potentialConnections = fullGraph.getNeighbors(randomStudent.toString())
-        potentialConnections.some((node) => {
-          if (node != connection && graph.getNeighbors(node).length == 0) {
-            graph.addEdge(randomStudent.toString(), node)
-            return true;
+        // Try to find an alternate edge to connect to
+        const potentialConnections = fullGraph.getNeighbors(randomStudent.toString());
+        for (const node of potentialConnections) {
+          if (
+            node !== connection &&
+            graph.getNeighbors(node).length === 0 // Ensure the target node has no connections
+          ) {
+            graph.addEdge(randomStudent.toString(), node);
+            return graph;
           }
-        })
-      } else {
-        let success = false
-        // Try to find an open node, if one exists and add an edge
-        let potentialConnections = fullGraph.getNeighbors(randomStudent.toString())
-        potentialConnections.some((node) => {
-          if (graph.getNeighbors(node).length == 0) {
-            graph.addEdge(randomStudent.toString(), node)
-            success = true
-            return true
-          }
-        })
-        // Otherwise try again
-        if (!success) {
-          neighbor(graph)
         }
-      } 
+      } else {
+        // Try to find an open node and add an edge
+        const potentialConnections = fullGraph.getNeighbors(randomStudent.toString());
+        for (const node of potentialConnections) {
+          if (graph.getNeighbors(node).length === 0) {
+            graph.addEdge(randomStudent.toString(), node);
+            return graph;
+          }
+        }
+      }
 
-      return graph
+      // If no valid connection is found, do nothing
+      return graph;
     }
 
     function temperature(percentCompleted) {
-      return 10000 * 0.95^percentCompleted;
+      return 10000 * 0.95 ^ percentCompleted;
     }
 
     const solver = new SimulatedAnnealing(solGraph, 100, temperature, neighbor, score)
