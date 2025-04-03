@@ -20,36 +20,35 @@ import SimulatedAnnealing from '../../algorithm-testing/src/solvers/simulated_an
 
 function App() {
 
-  function choseCSV(data) {
+  async function choseCSV(data) {
     console.log(data)
     const profReader = new DataReader(data.get('prof'));
     const stuReader = new DataReader(data.get('students'));
     
+    const profData = (await profReader.ready()).data
+    const stuData = (await stuReader.ready()).data
 
-    // Wait for the file to be parsed asynchronously
-    setTimeout(() => {
-      console.log('Parsed Prof Data:', profReader.parsedData);
-      console.log('Parsed Student Data:', stuReader.parsedData);
-    }, 1000); // Adjust the timeout as needed
+    console.log('Parsed Prof Data:', profData);
+    console.log('Parsed Student Data:', stuData);
 
     const fullGraph = new LinkedGraph()
     const solGraph = new LinkedGraph()
 
     // Load data into the graph data structure
-    profReader.parsedData.forEach((entry) => {
-      fullGraph.addNode(entry.get('"What times are you available to meet with Dr. Stewart? (please select all times that you are available)"'))
-      solGraph.addNode(entry.get('"What times are you available to meet with Dr. Stewart? (please select all times that you are available)"'))
+    profData.forEach((entry) => {
+      fullGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"])
+      solGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"])
     })
 
-    numStudents = 0
-    stuReader.parsedData.forEach((entry) => {
-      const id = entry.get('id')
+    let numStudents = 0
+    stuData.forEach((entry) => {
+      const id = entry['ID']
       fullGraph.addNode(id)
       solGraph.addNode(id)
       numStudents++
-
-      const times = entry.get('"What times are you available to meet with Dr. Stewart? (please select all times that you are available)"').split(';')
+      const times = entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"].split(';')
       times.forEach((time) => {
+        if (!time) return
         fullGraph.addEdge(id, time)
       })
     })
@@ -57,7 +56,7 @@ function App() {
     function score(graph) {
       score = 0
       for (let i = 0; i < numStudents; i++) {
-        if (graph.getNeighbors(i).length > 0) {
+        if (graph.getNeighbors(i.toString()).length > 0) {
           score += 100
         }
       }
@@ -65,28 +64,28 @@ function App() {
     }
 
     function neighbor(graph) {
-      randomStudent = Math.floor(Math.random() * (numStudents));
-      connection = graph.getNeighbors(randomStudent)
+      const randomStudent = Math.floor(Math.random() * (numStudents));
+      let connection = graph.getNeighbors(randomStudent.toString())
       if (connection.length > 0) {
-        connection = graph.connection[0]
+        connection = connection[0]
         // Delete the edge
         graph.removeEdge(randomStudent, connection)
 
         // Try to find an alternate edge to connect to, if not do nothing
-        potentialConnections = fullGraph.getNeighbors(randomStudent)
+        let potentialConnections = fullGraph.getNeighbors(randomStudent.toString())
         potentialConnections.some((node) => {
           if (node != connection && graph.getNeighbors(node).length == 0) {
-            graph.addEdge(randomStudent, node)
+            graph.addEdge(randomStudent.toString(), node)
             return true;
           }
         })
       } else {
-        success = false
+        let success = false
         // Try to find an open node, if one exists and add an edge
-        potentialConnections = fullGraph.getNeighbors(randomStudent)
+        let potentialConnections = fullGraph.getNeighbors(randomStudent.toString())
         potentialConnections.some((node) => {
           if (graph.getNeighbors(node).length == 0) {
-            graph.addEdge(randomStudent, node)
+            graph.addEdge(randomStudent.toString(), node)
             success = true
             return true
           }

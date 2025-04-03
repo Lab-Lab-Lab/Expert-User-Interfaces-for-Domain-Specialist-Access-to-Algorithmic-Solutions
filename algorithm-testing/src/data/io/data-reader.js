@@ -11,12 +11,17 @@ export default class DataReader {
      */
     constructor(file) {
         this._parsedData = null;
+        this.readyPromise = new Promise((resolve, reject) => {  
+            if (file instanceof File) {
+                this.readAndParseCSVFromFile(file, resolve, reject);
+            } else {
+                throw new Error('Invalid input: must be a File object.');
+            }
+        })
+    }
 
-        if (file instanceof File) {
-            this.readAndParseCSVFromFile(file);
-        } else {
-            throw new Error('Invalid input: must be a File object.');
-        }
+    ready() {
+        return this.readyPromise
     }
 
     /**
@@ -45,7 +50,7 @@ export default class DataReader {
      * 
      * @param {File} file - The File object.
      */
-    readAndParseCSVFromFile(file) {
+    readAndParseCSVFromFile(file, resolve, reject) {
         const reader = new FileReader();
         reader.onload = (event) => {
             const data = event.target.result;
@@ -54,9 +59,11 @@ export default class DataReader {
                 skipEmptyLines: true,
             });
             this.parsed(results);
+            resolve(results)
         };
         reader.onerror = (err) => {
             console.error('Error reading the file:', err);
+            reject(err)
         };
         reader.readAsText(file);
     }
