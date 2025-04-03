@@ -121,8 +121,8 @@ const initialEdges = [
   },
 ];
 
-const HorizontalFlow = () => {
-  const [nodes, _, onNodesChange] = useNodesState(initialNodes);
+const HorizontalFlow = (solutionTree) => {
+  const [nodes, _, onNodesChange] = useNodesState(solutionTree.root?.[0] ?? initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const onConnect = useCallback(
     (params) => setEdges((els) => addEdge(params, els)),

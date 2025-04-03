@@ -1,27 +1,27 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import HorizontalFlow from './HorizontalFlow'
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import DataReader from '../../algorithm-testing/src/data/io/data-reader'
 import LinkedGraph from '../../algorithm-testing/src/dataStructures/LinkedGraph'
 import SimulatedAnnealing from '../../algorithm-testing/src/solvers/simulated_annealing'
+import { useState } from 'react';
 
 
 
 function App() {
+  const [solutionTree, setSolutionTree] = useState({ root: [] })
 
   async function choseCSV(data) {
     console.log(data)
+    // if (!data.get('prof')){
+      const prof_text = await (await fetch("prof_data.csv")).text()
+      console.log(prof_text)
+    // }
+
     const profReader = new DataReader(data.get('prof'));
     const stuReader = new DataReader(data.get('students'));
 
@@ -115,6 +115,13 @@ function App() {
     const solver = new SimulatedAnnealing(solGraph, 1000000, temperature, neighbor, score)
     solver.optimize()
     console.log(solver.best_solution)
+    setSolutionTree({
+      ...solutionTree,
+      root: [
+        ...solutionTree.root,
+        solver.best_solution
+      ]
+    })
   }
 
   return (
@@ -126,7 +133,7 @@ function App() {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
 
-            <Form inline action={choseCSV}>
+            <Form action={choseCSV}>
               <Row>
                 <Col xs="auto">
                   <Form.Label>Prof</Form.Label>
@@ -165,7 +172,7 @@ function App() {
             </Nav> */}
           </Navbar.Collapse>
         </Navbar>
-        <HorizontalFlow></HorizontalFlow>
+        <HorizontalFlow solutionTree={solutionTree}></HorizontalFlow>
       </div>
     </>
   )
