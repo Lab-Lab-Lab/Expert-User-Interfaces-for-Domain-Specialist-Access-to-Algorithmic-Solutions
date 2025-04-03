@@ -42,15 +42,21 @@ function App() {
 
     let numStudents = 0
     stuData.forEach((entry) => {
-      const id = entry['ID']
-      fullGraph.addNode(id)
-      solGraph.addNode(id)
-      numStudents++
-      const times = entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"].split(';')
+      const id = entry['ID']?.toString(); // Ensure ID is treated as a string, even if it's 0
+      if (!id) {
+        console.warn('Skipping entry with missing or invalid ID:', entry);
+        return;
+      }
+
+      fullGraph.addNode(id);
+      solGraph.addNode(id);
+      numStudents++;
+
+      const times = entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"]?.split(';') || [];
       times.forEach((time) => {
-        if (!time) return
-        fullGraph.addEdge(id, time)
-      })
+        if (!time) return;
+        fullGraph.addEdge(id, time);
+      });
     })
 
     // debugger
@@ -74,7 +80,7 @@ function App() {
       if (connection.length > 0) {
         connection = connection[0];
         // Delete the edge
-        graph.removeEdge(randomStudent, connection);
+        graph.removeEdge(randomStudent.toString(), connection);
 
         // Try to find an alternate edge to connect to
         const potentialConnections = fullGraph.getNeighbors(randomStudent.toString());
@@ -106,7 +112,7 @@ function App() {
       return 10000 * 0.95 ^ percentCompleted;
     }
 
-    const solver = new SimulatedAnnealing(solGraph, 100, temperature, neighbor, score)
+    const solver = new SimulatedAnnealing(solGraph, 1000000, temperature, neighbor, score)
     solver.optimize()
     console.log(solver.best_solution)
   }
