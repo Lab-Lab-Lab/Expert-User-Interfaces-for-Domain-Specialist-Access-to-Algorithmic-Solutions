@@ -21,9 +21,6 @@ function App() {
     // ============================== Read Data ==============================
     // =======================================================================
 
-    // Log the users inputs
-    console.log(data)
-
     // Initialize profReader and stuReader
     let profReader, stuReader;
 
@@ -37,16 +34,18 @@ function App() {
       const stuText = await stuResponse.text();
       stuReader = new DataReader(stuText);
 
-      console.log("Default professor data loaded.");
+      console.log("Default data loaded.");
     } else {
       // Otherwise, load in the user provided files
       profReader = new DataReader(data.get('prof'));
       stuReader = new DataReader(data.get('students'));
+
+      console.log("User data loaded.");
     }
 
     // Once the files have finished being parsed, save the data in local variables
-    const profData = (await profReader.ready()).data
-    const stuData = (await stuReader.ready()).data
+    const profData = (await profReader.ready()).data;
+    const stuData = (await stuReader.ready()).data;
 
     // Log the parsed data
     console.log('Parsed Prof Data:', profData);
@@ -57,13 +56,13 @@ function App() {
     // =======================================================================
 
     // Declare the graphs for calculating a solution
-    const fullGraph = new LinkedGraph()
-    const solGraph = new LinkedGraph()
+    const fullGraph = new LinkedGraph();
+    const solGraph = new LinkedGraph();
 
     // Create nodes to the graph for all of the times listed in profData
     profData.forEach((entry) => {
-      fullGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"])
-      solGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"])
+      fullGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"]);
+      solGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"]);
     })
 
     // Add the appropriate nodes and connections for every student based on the stuData
@@ -87,7 +86,7 @@ function App() {
     })
 
     // Log the resulting fullGraph
-    console.log(fullGraph)
+    console.log('Full Bipartite Graph:', fullGraph)
 
     // ======================================================================
     // ======================== Calculate a Solution ========================
@@ -95,13 +94,13 @@ function App() {
 
     // Scores a given solution to the 1on1 meeting problem
     function score(graph) {
-      score = 0
+      score = 0;
       for (let i = 0; i < numStudents; i++) {
-        if (graph.getNeighbors(i.toString()).length > 0) {
-          score += 100
+        if (graph.hasNeighbors(i.toString())) {
+          score += 100;
         }
       }
-      return score
+      return score;
     }
 
     // Generates a random neighbor solution to the 1on1 problem
@@ -117,10 +116,8 @@ function App() {
         // Try to find an alternate edge to connect to
         const potentialConnections = fullGraph.getNeighbors(randomStudent.toString());
         for (const node of potentialConnections) {
-          if (
-            node !== connection &&
-            graph.getNeighbors(node).length === 0 // Ensure the target node has no connections
-          ) {
+          // Ensure the target node has no connections
+          if (node !== connection && !graph.hasNeighbors(node)) {
             graph.addEdge(randomStudent.toString(), node);
             return graph;
           }
@@ -129,7 +126,7 @@ function App() {
         // Try to find an open node and add an edge
         const potentialConnections = fullGraph.getNeighbors(randomStudent.toString());
         for (const node of potentialConnections) {
-          if (graph.getNeighbors(node).length === 0) {
+          if (!graph.hasNeighbors(node)) {
             graph.addEdge(randomStudent.toString(), node);
             return graph;
           }
@@ -147,10 +144,10 @@ function App() {
 
     // Run the simulated annesling algorithm
     const solver = new SimulatedAnnealing(solGraph, 1000000, temperature, neighbor, score)
-    solver.optimize()
+    solver.optimize();
 
     // Log the best solution
-    console.log(solver.best_solution)
+    console.log('Proposed Solution:', solver.best_solution);
 
     // Send the solution to react flow, to be displayed
     setSolutionTree({

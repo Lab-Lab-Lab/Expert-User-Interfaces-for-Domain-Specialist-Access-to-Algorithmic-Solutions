@@ -43,6 +43,13 @@ export default class LinkedGraph {
         return Array.from(this.nodes.get(id)); // Return neighbors as an array
     }
 
+    hasNeighbors(id) {
+        if (!this.nodes.has(id)) {
+            throw new Error("Node does not exist.");
+        }
+        return this.nodes.get(id).size > 0;
+    }
+
     hasEdge(fromId, toId) {
         return this.nodes.has(fromId) && this.nodes.get(fromId).has(toId);
     }
