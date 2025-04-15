@@ -16,12 +16,19 @@ function App() {
   const [solutionTree, setSolutionTree] = useState({ root: [] })
 
   async function choseCSV(data) {
-    console.log(data)
-    let profReader, stuReader;
-    const profFile = data.get('prof');
-    const stuFile = data.get('students');
 
-    if (profFile.size === 0) {
+    // =======================================================================
+    // ============================== Read Data ==============================
+    // =======================================================================
+
+    // Log the users inputs
+    console.log(data)
+
+    // Initialize profReader and stuReader
+    let profReader, stuReader;
+
+    if (data.get('prof').size === 0) {
+      // If no file was provided use the defaults
       const profResponse = await fetch("prof_data.csv");
       const profText = await profResponse.text();
       profReader = new DataReader(profText);
@@ -32,25 +39,34 @@ function App() {
 
       console.log("Default professor data loaded.");
     } else {
-      profReader = new DataReader(profFile);
-      stuReader = new DataReader(stuFile);
+      // Otherwise, load in the user provided files
+      profReader = new DataReader(data.get('prof'));
+      stuReader = new DataReader(data.get('students'));
     }
 
+    // Once the files have finished being parsed, save the data in local variables
     const profData = (await profReader.ready()).data
     const stuData = (await stuReader.ready()).data
 
+    // Log the parsed data
     console.log('Parsed Prof Data:', profData);
     console.log('Parsed Student Data:', stuData);
 
+    // =======================================================================
+    // ================= Load Data Into Graph Data Structure =================
+    // =======================================================================
+
+    // Declare the graphs for calculating a solution
     const fullGraph = new LinkedGraph()
     const solGraph = new LinkedGraph()
 
-    // Load data into the graph data structure
+    // Create nodes to the graph for all of the times listed in profData
     profData.forEach((entry) => {
       fullGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"])
       solGraph.addNode(entry["What times are you available to meet with Dr. Stewart? (please select all times that you are available)"])
     })
 
+    // Add the appropriate nodes and connections for every student based on the stuData
     let numStudents = 0
     stuData.forEach((entry) => {
       const id = entry['ID']?.toString(); // Ensure ID is treated as a string, even if it's 0
@@ -70,10 +86,14 @@ function App() {
       });
     })
 
-    // debugger
-
+    // Log the resulting fullGraph
     console.log(fullGraph)
 
+    // ======================================================================
+    // ======================== Calculate a Solution ========================
+    // ======================================================================
+
+    // Scores a given solution to the 1on1 meeting problem
     function score(graph) {
       score = 0
       for (let i = 0; i < numStudents; i++) {
@@ -84,6 +104,7 @@ function App() {
       return score
     }
 
+    // Generates a random neighbor solution to the 1on1 problem
     function neighbor(graph) {
       const randomStudent = Math.floor(Math.random() * numStudents);
       let connection = graph.getNeighbors(randomStudent.toString());
@@ -119,13 +140,19 @@ function App() {
       return graph;
     }
 
+    // Calculates the temp based on the percent of iterations which have been completed
     function temperature(percentCompleted) {
       return 10000 * 0.95 ^ percentCompleted;
     }
 
+    // Run the simulated annesling algorithm
     const solver = new SimulatedAnnealing(solGraph, 1000000, temperature, neighbor, score)
     solver.optimize()
+
+    // Log the best solution
     console.log(solver.best_solution)
+
+    // Send the solution to react flow, to be displayed
     setSolutionTree({
       ...solutionTree,
       root: [
@@ -136,47 +163,44 @@ function App() {
   }
 
   return (
-    <>
-      <div style={{ height: "100vh", width: "100vw" }}>
+    <div style={{ height: "100vh", width: "100vw" }}>
+      <Navbar expand="lg" className="bg-body-tertiary justify-content-between">
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Form action={choseCSV}>
+            <Row>
+              <Col xs="auto">
+                <h4>Professor Data</h4>
+              </Col>
+              <Col xs="auto">
+                <Form.Control
+                  type="file"
+                  className=" mr-sm-2"
+                  name='prof'
+                />
+              </Col>
+              <Col xs="auto">
+                <h4>Student Data</h4>
+              </Col>
+              <Col xs="auto">
+                <Form.Control
+                  type="file"
+                  className=" mr-sm-2"
+                  name='students'
+                />
+              </Col>
+              <Col xs="auto">
+                <Button type="submit">Submit</Button>
+              </Col>
+            </Row>
+          </Form>
+        </Navbar.Collapse>
+      </Navbar>
 
-        <Navbar expand="lg" className="bg-body-tertiary justify-content-between">
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-
-            <Form action={choseCSV}>
-              <Row>
-                <Col xs="auto">
-                  <h4>Professor Data</h4>
-                </Col>
-                <Col xs="auto">
-                  <Form.Control
-                    type="file"
-                    className=" mr-sm-2"
-                    name='prof'
-                  />
-                </Col>
-                <Col xs="auto">
-                  <h4>Student Data</h4>
-                </Col>
-                <Col xs="auto">
-                  <Form.Control
-                    type="file"
-                    className=" mr-sm-2"
-                    name='students'
-                  />
-                </Col>
-                <Col xs="auto">
-                  <Button type="submit">Submit</Button>
-                </Col>
-              </Row>
-            </Form>
-          </Navbar.Collapse>
-        </Navbar>
-        <div style={{ height: 'calc(100vh - 54px)' }}>
-          <HorizontalFlow solutionTree={solutionTree}></HorizontalFlow>
-        </div>
+      <div style={{ height: 'calc(100vh - 54px)' }}>
+        <HorizontalFlow solutionTree={solutionTree}></HorizontalFlow>
       </div>
-    </>
+    </div>
   )
 }
 
