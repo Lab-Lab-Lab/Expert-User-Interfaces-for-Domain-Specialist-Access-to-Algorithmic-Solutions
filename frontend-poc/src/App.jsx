@@ -17,13 +17,24 @@ function App() {
 
   async function choseCSV(data) {
     console.log(data)
-    // if (!data.get('prof')){
-    // const prof_text = await (await fetch("prof_data.csv")).text()
-    // console.log(prof_text)
-    // }
+    let profReader, stuReader;
+    const profFile = data.get('prof');
+    const stuFile = data.get('students');
 
-    const profReader = new DataReader(data.get('prof'));
-    const stuReader = new DataReader(data.get('students'));
+    if (profFile.size === 0) {
+      const profResponse = await fetch("prof_data.csv");
+      const profText = await profResponse.text();
+      profReader = new DataReader(profText);
+
+      const stuResponse = await fetch("fake_data_realistic_0.csv");
+      const stuText = await stuResponse.text();
+      stuReader = new DataReader(stuText);
+
+      console.log("Default professor data loaded.");
+    } else {
+      profReader = new DataReader(profFile);
+      stuReader = new DataReader(stuFile);
+    }
 
     const profData = (await profReader.ready()).data
     const stuData = (await stuReader.ready()).data

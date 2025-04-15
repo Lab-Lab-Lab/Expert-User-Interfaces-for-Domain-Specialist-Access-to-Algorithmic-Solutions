@@ -7,21 +7,23 @@ export default class DataReader {
     /**
      * Creates an instance of DataReader.
      * 
-     * @param {File} file - The File object representing the CSV file.
+     * @param {File|string} file - The File object representing the CSV file or a CSV string.
      */
     constructor(file) {
         this._parsedData = null;
         this.readyPromise = new Promise((resolve, reject) => {  
             if (file instanceof File) {
                 this.readAndParseCSVFromFile(file, resolve, reject);
+            } else if (typeof file === 'string') {
+                this.readAndParseCSVFromString(file, resolve, reject);
             } else {
-                throw new Error('Invalid input: must be a File object.');
+                reject(new Error('Invalid input: must be a File object or a CSV string.'));
             }
-        })
+        });
     }
 
     ready() {
-        return this.readyPromise
+        return this.readyPromise;
     }
 
     /**
@@ -66,6 +68,25 @@ export default class DataReader {
             reject(err)
         };
         reader.readAsText(file);
+    }
+
+    /**
+     * Reads and parses the CSV data from a string.
+     * 
+     * @param {string} data - The CSV string.
+     */
+    readAndParseCSVFromString(data, resolve, reject) {
+        try {
+            const results = Papa.parse(data, {
+                header: true,
+                skipEmptyLines: true,
+            });
+            this.parsed(results);
+            resolve(results);
+        } catch (err) {
+            console.error('Error parsing the CSV string:', err);
+            reject(err);
+        }
     }
 
     /**
