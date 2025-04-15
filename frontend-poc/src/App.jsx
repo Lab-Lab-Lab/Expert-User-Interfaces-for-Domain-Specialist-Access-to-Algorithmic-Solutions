@@ -18,8 +18,8 @@ function App() {
   async function choseCSV(data) {
     console.log(data)
     // if (!data.get('prof')){
-      const prof_text = await (await fetch("prof_data.csv")).text()
-      console.log(prof_text)
+    // const prof_text = await (await fetch("prof_data.csv")).text()
+    // console.log(prof_text)
     // }
 
     const profReader = new DataReader(data.get('prof'));
@@ -129,21 +129,25 @@ function App() {
       <div style={{ height: "100vh", width: "100vw" }}>
 
         <Navbar expand="lg" className="bg-body-tertiary justify-content-between">
-          {/* <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand> */}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
 
             <Form action={choseCSV}>
               <Row>
                 <Col xs="auto">
-                  <Form.Label>Prof</Form.Label>
+                  <h4>Professor Data</h4>
+                </Col>
+                <Col xs="auto">
                   <Form.Control
                     type="file"
                     className=" mr-sm-2"
                     name='prof'
-                  /></Col>
+                  />
+                </Col>
                 <Col xs="auto">
-                  <Form.Label>Students</Form.Label>
+                  <h4>Student Data</h4>
+                </Col>
+                <Col xs="auto">
                   <Form.Control
                     type="file"
                     className=" mr-sm-2"
@@ -155,24 +159,11 @@ function App() {
                 </Col>
               </Row>
             </Form>
-            {/* <Nav className="me-auto">
-              <Nav.Link href="#home">Home</Nav.Link>
-              <Nav.Link href="#link">Link</Nav.Link>
-              <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                <NavDropdown.Item href="#action/3.2">
-                  Another action
-                </NavDropdown.Item>
-                <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href="#action/3.4">
-                  Separated link
-                </NavDropdown.Item>
-              </NavDropdown>
-            </Nav> */}
           </Navbar.Collapse>
         </Navbar>
-        <HorizontalFlow solutionTree={solutionTree}></HorizontalFlow>
+        <div style={{ height: 'calc(100vh - 54px)' }}>
+          <HorizontalFlow solutionTree={solutionTree}></HorizontalFlow>
+        </div>
       </div>
     </>
   )
