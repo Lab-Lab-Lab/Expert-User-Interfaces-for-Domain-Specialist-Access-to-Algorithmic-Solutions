@@ -1,12 +1,15 @@
 export default class LinkedGraph {
     constructor() {
         this.nodes = new Map(); // Map to store nodes by their unique identifiers
+        this.data = {}
     }
 
-    addNode(id) {
+    addNode(id, isTarget) {
         if (!this.nodes.has(id)) {
             this.nodes.set(id, new Set()); // Each node points to a set of connected nodes
         }
+        let shouldTarget = isTarget ?? false;
+        this.data[id] = {shouldTarget}
     }
 
     addEdge(fromId, toId) {
